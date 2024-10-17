@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cheapest Purchase via Currency Conversion</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Find the Cheapest Way to Buy!</h1>
+        <p>Enter the price of the item in different currencies:</p>
+        
+        <form id="priceForm">
+            <div class="input-group">
+                <label for="price">Price in USD: </label>
+                <input type="number" id="usdPrice" placeholder="Price in USD">
+            </div>
+            <div class="input-group">
+                <label for="price">Price in EUR: </label>
+                <input type="number" id="eurPrice" placeholder="Price in EUR">
+            </div>
+            <div class="input-group">
+                <label for="price">Price in GBP: </label>
+                <input type="number" id="gbpPrice" placeholder="Price in GBP">
+            </div>
+            <div class="input-group">
+                <label for="price">Price in JPY: </label>
+                <input type="number" id="jpyPrice" placeholder="Price in JPY">
+            </div>
+            
+            <button type="submit">Find Cheapest</button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#result {
+    margin-top: 20px;
+    font-size: 1.2em;
+}
+document.getElementById('priceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Get input prices
+    const usdPrice = parseFloat(document.getElementById('usdPrice').value);
+    const eurPrice = parseFloat(document.getElementById('eurPrice').value);
+    const gbpPrice = parseFloat(document.getElementById('gbpPrice').value);
+    const jpyPrice = parseFloat(document.getElementById('jpyPrice').value);
+
+    // Fetch live exchange rates
+    const apiKey = 'YOUR_API_KEY';  // Replace with your ExchangeRate-API key
+    const apiURL = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`;
+
+    fetch(apiURL)
+    .then(response => response.json())
+    .then(data => {
+        const exchangeRates = {
+            EUR: data.conversion_rates.EUR,
+            GBP: data.conversion_rates.GBP,
+            JPY: data.conversion_rates.JPY,
+        };
+
+        // Convert all prices to USD
+        const pricesInUSD = {
+            USD: usdPrice,
+            EUR: eurPrice * exchangeRates.EUR,
+            GBP: gbpPrice * exchangeRates.GBP,
+            JPY: jpyPrice * exchangeRates.JPY
+        };
+
+        // Find the cheapest option
+        const cheapestCurrency = Object.keys(pricesInUSD).reduce((a, b) => pricesInUSD[a] < pricesInUSD[b] ? a : b);
+        const cheapestPrice = pricesInUSD[cheapestCurrency];
+
+        // Display the result
+        document.getElementById('result').innerHTML = `The cheapest option is in <strong>${cheapestCurrency}</strong> with a price of <strong>$${cheapestPrice.toFixed(2)}</strong>`;
+    })
+    .catch(error => {
+        console.error('Error fetching exchange rates:', error);
+        document.getElementById('result').innerHTML = 'Error fetching exchange rates. Please try again later.';
+    });
+});
+
+
+                                              
